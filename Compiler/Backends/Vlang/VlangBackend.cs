@@ -13,8 +13,8 @@ public class VlangBackend : Backend, IBackend
         Analyze(ast);
 
         var outputFilePath = Path.Combine(job.TargetDirectory, "output.v");
-        
-        var outputStream   = new StreamWriter(outputFilePath);
+
+        var outputStream = new StreamWriter(outputFilePath);
 
         GenerateOutput(ast, outputStream);
 
@@ -26,23 +26,23 @@ public class VlangBackend : Backend, IBackend
         var vlang = new VlangRunner();
 
         var process = vlang.Run([transpile.OutputFilePath]);
-       
-        // read the output
+
         var output = process.StandardOutput.ReadToEnd();
         Console.WriteLine(output);
 
         return new BuildResult();
     }
 
-    public void Run(TranspilingResult transpile)
+    public int Run(TranspilingResult transpile)
     {
         var vlang = new VlangRunner();
 
         var process = vlang.Run(["run", transpile.OutputFilePath]);
-       
-        // read the output
+
         var output = process.StandardOutput.ReadToEnd();
         Console.WriteLine(output);
+        
+        return process.ExitCode;
     }
 
     // implementation details
@@ -50,7 +50,7 @@ public class VlangBackend : Backend, IBackend
     private object ParseSourceCode(StreamReader input)
     {
         // Placeholder for actual parsing logic
-        return new {};
+        return new { };
     }
 
     private void Analyze(object ast)
@@ -67,7 +67,7 @@ public class VlangBackend : Backend, IBackend
                              """;
 
         outputStream.Write(hello);
-        
+
         outputStream.Flush();
     }
 }

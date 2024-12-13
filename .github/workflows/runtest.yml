@@ -32,6 +32,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install Vlang
+        id: vlang
+        uses: vlang/setup-v@v1.4
+
+      - name: Expose Vlang home
+        run: |
+          echo "V_HOME=${{ steps.vlang.outputs.bin-path }}" >> $GITHUB_ENV
+        shell: bash
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
@@ -45,28 +54,26 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      #- name: Install dependencies
-      #  run: dotnet restore
-
       - name: Publish compiler
-        run: dotnet publish -c Release -r ${{ matrix.rid }} -p:PublishSingleFile=true --self-contained -o output
+        run: dotnet publish -c Release -r ${{ matrix.rid }} -p:PublishSingleFile=true --self-contained
 
       - name: Check where we are
         run: pwd
 
       - name: List all files in publish directory
-        run: ls -R output
+        run: ls -R output/bin/Release/net9.0/${{ matrix.rid }}/publish
 
       - name: Copy compiler binary to current directory
-        run: cp output/Compiler${{ matrix.exe_suffix }} ./vitu${{ matrix.exe_suffix }}
+        run: cp output/bin/Release/net9.0/${{ matrix.rid }}/publish/Compiler${{ matrix.exe_suffix }} ./vitu${{ matrix.exe_suffix }}
 
       - name: Verify compiler binary
-        run: ./vitu --version
+        run: ./vitu${{ matrix.exe_suffix }} --version
 
       - name: Run tests
         run: |
-          for test_file in Tests/Compiler/*; do
-            ./vitu build "$test_file"
+          export ZV_HOME='${{ steps.vlang.outputs.bin-path }}'
+          for test_file in Tests/Sources/*; do
+            ./vitu${{ matrix.exe_suffix }} build "$test_file"
             if [ $? -ne 0 ]; then
               echo "Test failed for $test_file"
               exit 1
