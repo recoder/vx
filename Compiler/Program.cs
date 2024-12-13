@@ -1,9 +1,9 @@
 ﻿using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
+using Compiler;
 
+/*
 
-/*    
-    
 # Vitu CLI Usage Guide
 
 ## Commands Overview
@@ -96,97 +96,179 @@ var rootCommand = new RootCommand("Vitu Compiler");
 
 var buildCommand = new Command("build", "Compiles a Vitu project")
 {
-    new Option<string>("--backend", "Specify the backend (e.g., `v`, `go`)"),
+    new Option<string>("--backend", () => "v", "Specify the backend (e.g., `v`, `go`)"),
     new Option<string>("--os", "Target operating system"),
     new Option<string>("--arch", "Target architecture"),
     new Option<bool>("--debug", "Build in debug mode"),
-    new Option<bool>("--release", "Build in release mode")
+    new Option<bool>("--release", "Build in release mode"),
+    new Argument<string>("filename", "The Vitu source file to run")
 };
-buildCommand.Handler = CommandHandler.Create<string, string, string, bool, bool>((backend, os, arch, debug, release) =>
-{
-    Console.WriteLine($"Building project with backend: {backend}, OS: {os}, Arch: {arch}, Debug: {debug}, Release: {release}");
-    // Build logic here
-});
+buildCommand.Handler = CommandHandler.Create<string, string, string, bool, bool, string>(
+    (backend,
+        os,
+        arch,
+        debug,
+        release,
+        filename) =>
+    {
+        Console.WriteLine(
+            $"Building project with backend: {backend}, OS: {os}, Arch: {arch}, Debug: {debug}, Release: {release}");
+
+        var job = new BuildJob
+        {
+            Configuration = new()
+            {
+                Backend            = backend,
+                TargetOS           = os,
+                TargetArchitecture = arch,
+                Debug              = debug,
+                Release            = release
+            },
+            SourceFile      = filename,
+            TargetDirectory = "build"
+        };
+
+        var compiler = new VituCompiler();
+        compiler.Build(job);
+    });
 
 var runCommand = new Command("run", "Runs a Vitu program directly")
 {
     new Argument<string>("filename", "The Vitu source file to run")
 };
-runCommand.Handler = CommandHandler.Create<string>((filename) =>
+runCommand.Handler = CommandHandler.Create<string>(filename =>
 {
     Console.WriteLine($"Running file: {filename}");
-    // Run logic here
+
+    var job = new BuildJob
+    {
+        Configuration = new()
+        {
+            Backend            = "v",
+            TargetOS           = "windows",
+            TargetArchitecture = "x64",
+            Debug              = false,
+            Release            = false
+        },
+        SourceFile      = filename,
+        TargetDirectory = "build"
+    };
+
+    var compiler = new VituCompiler();
+    compiler.Run(job);
 });
 
 var testCommand = new Command("test", "Runs tests for a Vitu project")
 {
     new Option<string>("--backend", "Specify the backend for tests")
 };
-testCommand.Handler = CommandHandler.Create<string>((backend) =>
+testCommand.Handler = CommandHandler.Create<string>(backend =>
 {
     Console.WriteLine($"Testing with backend: {backend}");
-    // Test logic here
+
+    var job = new BuildJob
+    {
+        Configuration = new()
+        {
+            Backend            = backend,
+            TargetOS           = "windows",
+            TargetArchitecture = "x64",
+            Debug              = true,
+            Release            = false
+        },
+        SourceFile      = "main.v2",
+        TargetDirectory = "build"
+    };
+
+    var compiler = new VituCompiler();
+    compiler.Test(job);
 });
 
 var fmtCommand = new Command("fmt", "Formats Vitu source code")
 {
     new Option<string>("--style", "Choose formatting style (`ascii` or `unicode`)")
 };
-fmtCommand.Handler = CommandHandler.Create<string>((style) =>
+fmtCommand.Handler = CommandHandler.Create<string>(style =>
 {
     Console.WriteLine($"Formatting with style: {style}");
-    // Format logic here
+
+    var compiler = new VituCompiler();
+    compiler.Format(style);
 });
 
 var getCommand = new Command("get", "Downloads and installs modules")
 {
     new Argument<string>("module@version", "Install a specific version")
 };
-getCommand.Handler = CommandHandler.Create<string>((moduleVersion) =>
+getCommand.Handler = CommandHandler.Create<string>(moduleVersion =>
 {
     Console.WriteLine($"Installing module: {moduleVersion}");
-    // Get logic here
+
+    var manager = new VituManager();
+    manager.GetModule(moduleVersion);
 });
 
 var docCommand = new Command("doc", "Displays documentation for a module or symbol")
 {
     new Argument<string>("moduleOrSymbol", "The module or symbol to display documentation for")
 };
-docCommand.Handler = CommandHandler.Create<string>((moduleOrSymbol) =>
+docCommand.Handler = CommandHandler.Create<string>(moduleOrSymbol =>
 {
     Console.WriteLine($"Displaying documentation for: {moduleOrSymbol}");
-    // Doc logic here
+
+    var manager = new VituManager();
+    manager.GetDoc(moduleOrSymbol);
 });
 
 var cleanCommand = new Command("clean", "Removes build artifacts and temporary files");
 cleanCommand.Handler = CommandHandler.Create(() =>
 {
     Console.WriteLine("Cleaning build artifacts and temporary files");
-    // Clean logic here
+
+    var compiler = new VituCompiler();
+    compiler.Clean();
 });
 
 var versionCommand = new Command("version", "Prints the Vitu version");
 versionCommand.Handler = CommandHandler.Create(() =>
 {
-    Console.WriteLine("Vitu Compiler Version 0.0.1");
-    // Version logic here
+    Console.WriteLine($"Vitu Compiler Version {VituCompiler.Version}");
 });
 
 var envCommand = new Command("env", "Displays environment information");
 envCommand.Handler = CommandHandler.Create(() =>
 {
     Console.WriteLine("Displaying environment information");
-    // Env logic here
+
+    // var compiler = new VituCompiler();
+    // compiler.Env();
 });
 
 var transpileCommand = new Command("transpile", "Transpiles Vitu code to other languages")
 {
-    new Option<string>("--backend", "Specify the target language backend")
+    new Option<string>("--backend", "Specify the target language backend"),
+    new Argument<string>("filename", "The Vitu source file to run")
 };
-transpileCommand.Handler = CommandHandler.Create<string>((backend) =>
+transpileCommand.Handler = CommandHandler.Create<string, string>((backend, filename) =>
 {
     Console.WriteLine($"Transpiling to backend: {backend}");
-    // Transpile logic here
+
+    var job = new BuildJob
+    {
+        Configuration = new()
+        {
+            Backend            = backend,
+            TargetOS           = "linux",
+            TargetArchitecture = "x64",
+            Debug              = false,
+            Release            = false
+        },
+        SourceFile      = filename,
+        TargetDirectory = "build"
+    };
+
+    var compiler = new VituCompiler();
+    compiler.Transpile(job);
 });
 
 rootCommand.AddCommand(buildCommand);
