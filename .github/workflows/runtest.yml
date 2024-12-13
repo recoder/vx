@@ -1,1 +1,75 @@
+name: Test compiler against test files
 
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  DOTNET_VERSION: '9.0'
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: macOS-latest
+            rid: osx-x64
+          - os: windows-latest
+            rid: win-x64
+            exe_suffix: .exe
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/global.json', '**/*.csproj', '**/*.fsproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      #- name: Install dependencies
+      #  run: dotnet restore
+
+      - name: Publish compiler
+        run: dotnet publish -c Release -r ${{ matrix.rid }} -p:PublishSingleFile=true --self-contained -o output
+
+      - name: Check where we are
+        run: pwd
+
+      - name: List all files in publish directory
+        run: ls -R output
+
+      - name: Copy compiler binary to current directory
+        run: cp output/Compiler${{ matrix.exe_suffix }} ./vitu${{ matrix.exe_suffix }}
+
+      - name: Verify compiler binary
+        run: ./vitu --version
+
+      - name: Run tests
+        run: |
+          for test_file in Tests/Compiler/*; do
+            ./vitu build "$test_file"
+            if [ $? -ne 0 ]; then
+              echo "Test failed for $test_file"
+              exit 1
+            fi
+          done
+        shell: bash
