@@ -15,4 +15,9 @@ public class BuildResult
 
 public class TranspilingResult
 {
+    public string OutputFilePath { get; set; } = "";
+}
+
+public class Backend
+{
 }
