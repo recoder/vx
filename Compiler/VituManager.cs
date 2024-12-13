@@ -2,12 +2,12 @@ namespace Compiler;
 
 public class VituManager
 {
-    public void GetModule(string moduleVersion)
+    public int GetModule(string moduleVersion)
     {
         throw new NotImplementedException();
     }
 
-    public void GetDoc(string moduleOrSymbol)
+    public int GetDoc(string moduleOrSymbol)
     {
         throw new NotImplementedException();
     }

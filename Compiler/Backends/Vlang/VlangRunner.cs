@@ -35,10 +35,10 @@ public class VlangRunner
     
     private string DetectVlangRoot()
     {
-        var vlangRoot = Environment.GetEnvironmentVariable("VLANG_ROOT");
+        var vlangRoot = Environment.GetEnvironmentVariable("V_HOME");
         if (string.IsNullOrEmpty(vlangRoot))
         {
-            throw new InvalidOperationException("VLANG_ROOT environment variable is not set.");
+            throw new InvalidOperationException("V_HOME environment variable is not set.");
         }
         
         // we might autodetect the root in the future

@@ -129,7 +129,8 @@ buildCommand.Handler = CommandHandler.Create<string, string, string, bool, bool,
         };
 
         var compiler = new VituCompiler();
-        compiler.Build(job);
+        
+        return compiler.Build(job);
     });
 
 var runCommand = new Command("run", "Runs a Vitu program directly")
@@ -155,7 +156,8 @@ runCommand.Handler = CommandHandler.Create<string>(filename =>
     };
 
     var compiler = new VituCompiler();
-    compiler.Run(job);
+    
+    return compiler.Run(job);
 });
 
 var testCommand = new Command("test", "Runs tests for a Vitu project")
@@ -181,7 +183,8 @@ testCommand.Handler = CommandHandler.Create<string>(backend =>
     };
 
     var compiler = new VituCompiler();
-    compiler.Test(job);
+    
+    return compiler.Test(job);
 });
 
 var fmtCommand = new Command("fmt", "Formats Vitu source code")
@@ -193,7 +196,8 @@ fmtCommand.Handler = CommandHandler.Create<string>(style =>
     Console.WriteLine($"Formatting with style: {style}");
 
     var compiler = new VituCompiler();
-    compiler.Format(style);
+    
+    return compiler.Format(style);
 });
 
 var getCommand = new Command("get", "Downloads and installs modules")
@@ -205,7 +209,8 @@ getCommand.Handler = CommandHandler.Create<string>(moduleVersion =>
     Console.WriteLine($"Installing module: {moduleVersion}");
 
     var manager = new VituManager();
-    manager.GetModule(moduleVersion);
+    
+    return manager.GetModule(moduleVersion);
 });
 
 var docCommand = new Command("doc", "Displays documentation for a module or symbol")
@@ -217,7 +222,8 @@ docCommand.Handler = CommandHandler.Create<string>(moduleOrSymbol =>
     Console.WriteLine($"Displaying documentation for: {moduleOrSymbol}");
 
     var manager = new VituManager();
-    manager.GetDoc(moduleOrSymbol);
+   
+    return manager.GetDoc(moduleOrSymbol);
 });
 
 var cleanCommand = new Command("clean", "Removes build artifacts and temporary files");
@@ -226,7 +232,8 @@ cleanCommand.Handler = CommandHandler.Create(() =>
     Console.WriteLine("Cleaning build artifacts and temporary files");
 
     var compiler = new VituCompiler();
-    compiler.Clean();
+    
+    return compiler.Clean();
 });
 
 var versionCommand = new Command("version", "Prints the Vitu version");
@@ -240,8 +247,9 @@ envCommand.Handler = CommandHandler.Create(() =>
 {
     Console.WriteLine("Displaying environment information");
 
-    // var compiler = new VituCompiler();
-    // compiler.Env();
+    var compiler = new VituCompiler();
+    
+    return compiler.Env();
 });
 
 var transpileCommand = new Command("transpile", "Transpiles Vitu code to other languages")
@@ -268,7 +276,8 @@ transpileCommand.Handler = CommandHandler.Create<string, string>((backend, filen
     };
 
     var compiler = new VituCompiler();
-    compiler.Transpile(job);
+    
+    return compiler.Transpile(job);
 });
 
 rootCommand.AddCommand(buildCommand);

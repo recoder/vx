@@ -6,7 +6,7 @@ public interface IBackend
     
     BuildResult Build(TranspilingResult transpile);
     
-    void Run(TranspilingResult transpile);
+    int Run(TranspilingResult transpile);
 }
 
 public class BuildResult

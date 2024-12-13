@@ -7,65 +7,75 @@ public class VituCompiler
 {
     public static string Version => "0.0.0";
 
-    public void Transpile(BuildJob job)
+    public int Transpile(BuildJob job)
     {
         // transpile = parse + compile + optimize + generate
-
-        var backend = CreateBackend(job.Configuration.Backend);
-
         try
         {
-            var r = backend.Transpile(job);
+            var backend = CreateBackend(job.Configuration.Backend);
+
+            backend.Transpile(job);
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
+            return 1;
         }
+        
+        return 0;
     }
 
-    public void Build(BuildJob job)
+    public int Build(BuildJob job)
     {
         // build = transpile + compile + link
-        
-        var backend = CreateBackend(job.Configuration.Backend);
-        
         try
         {
+
+            var backend = CreateBackend(job.Configuration.Backend);
+
             var r = backend.Build(backend.Transpile(job));
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
+            return 1;
         }
+        
+        return 0;
     }
 
-    public void Run(BuildJob job)
+    public int Run(BuildJob job)
     {
         // run = build + execute
-        
-        var backend = CreateBackend(job.Configuration.Backend);
-        
         try
         {
-            backend.Run(backend.Transpile(job));
+            var backend = CreateBackend(job.Configuration.Backend);
+
+            return backend.Run(backend.Transpile(job));
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
         }
+        return -1; 
     }
 
-    public void Test(BuildJob job)
+    public int Test(BuildJob job)
     {
         throw new NotImplementedException();
     }
 
-    public void Format(string style)
+    public int Format(string style)
     {
         throw new NotImplementedException();
     }
 
-    public void Clean()
+    public int Clean()
+    {
+        throw new NotImplementedException();
+    }
+
+    public int Env()
     {
         throw new NotImplementedException();
     }
