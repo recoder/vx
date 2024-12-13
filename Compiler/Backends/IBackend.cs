@@ -1,6 +1,18 @@
-namespace Compiler;
+namespace Compiler.Backends;
 
 public interface IBackend
 {
-    void Transpile(BuildJob job);
+    TranspilingResult Transpile(BuildJob job);
+    
+    BuildResult Build(TranspilingResult transpile);
+    
+    void Run(TranspilingResult transpile);
+}
+
+public class BuildResult
+{
+}
+
+public class TranspilingResult
+{
 }
