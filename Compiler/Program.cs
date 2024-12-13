@@ -125,7 +125,7 @@ buildCommand.Handler = CommandHandler.Create<string, string, string, bool, bool,
                 Release            = release
             },
             SourceFile      = filename,
-            TargetDirectory = "build"
+            TargetDirectory = "output"
         };
 
         var compiler = new VituCompiler();
@@ -151,7 +151,7 @@ runCommand.Handler = CommandHandler.Create<string>(filename =>
             Release            = false
         },
         SourceFile      = filename,
-        TargetDirectory = "build"
+        TargetDirectory = "output"
     };
 
     var compiler = new VituCompiler();
@@ -177,7 +177,7 @@ testCommand.Handler = CommandHandler.Create<string>(backend =>
             Release            = false
         },
         SourceFile      = "main.v2",
-        TargetDirectory = "build"
+        TargetDirectory = "output"
     };
 
     var compiler = new VituCompiler();
@@ -264,7 +264,7 @@ transpileCommand.Handler = CommandHandler.Create<string, string>((backend, filen
             Release            = false
         },
         SourceFile      = filename,
-        TargetDirectory = "build"
+        TargetDirectory = "output"
     };
 
     var compiler = new VituCompiler();
